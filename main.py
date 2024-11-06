@@ -21,16 +21,16 @@ jogando = False
 
 # Configuração de fonte e botão
 def get_font(size):  # Função para carregar a fonte
-    return pygame.font.Font('font.ttf', size)
+    return pygame.font.Font('8-BIT WONDER.TTF', size)
 
 fonte = get_font(24)
-img_botao = pygame.image.load("imagens/cbbba.png")
-img_botao = pygame.transform.scale(img_botao, (512, 393))
+img_botao = pygame.image.load("imagens\Quit Rect (1).png")
+img_botao = pygame.transform.scale(img_botao, (300, 60))##ajustar a merda da imagem q ta toda fudida tambem 
 
 def img_principal():
     display.blit(imagem, (0, 0))
 
-class Buttons:
+class Buttons: # ajustar esse negocio dos botoes q ta uma merda
     def __init__(self, text, pos):
         self.text = text
         self.pos = pos
@@ -39,7 +39,7 @@ class Buttons:
     def draw(self, tela):
         tela.blit(img_botao, self.button)
         text = fonte.render(self.text, True, (0, 0, 0))  
-        tela.blit(text, (self.pos[0] + 31.5, self.pos[1] + 21))  # ajuste se necessário
+        tela.blit(text, (self.pos[0] + 31.5, self.pos[1] + 21))  # ajustar isso aq
 
     def checa_clique(self):
         if self.button.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
@@ -48,28 +48,24 @@ class Buttons:
             return False
 
 def desenha_menu_principal():
-    MENU_TEXT = get_font(100).render("MENU", True, "#b68f40")
-    MENU_RECT = MENU_TEXT.get_rect(center=(largura // 2, 100))
-    display.blit(MENU_TEXT, MENU_RECT)
+    textoMenu = get_font(100).render("MENU", True, "#b68f40")
+    menuCent = textoMenu.get_rect(center=(largura // 2, 100))
+    display.blit(textoMenu, menuCent)
     
     # Botões do menu centralizados
-    botao_menu = Buttons('Sair do Menu', (largura // 2 - 140, 400))
-    jogar = Buttons('Jogar', (largura // 2 - 140, 500))
+    botao_menu = Buttons('Sair do Menu', (largura // 2 - 140, 500))
+    jogar = Buttons('Jogar', (largura // 2 - 140, 400))
+    
 
     botao_menu.draw(display)
     jogar.draw(display)
     
     
+    if jogar.checa_clique():
+        return 'jogar'
     if botao_menu.checa_clique():
         return 'sair_menu'
-    elif jogar.checa_clique():
-        return 'jogar'
     return None
-
-def desenha_botao_inicio():
-    button = Buttons('Menu Principal', (largura // 2 - 140, 600))
-    button.draw(display)
-    return button.checa_clique()
 
 #gameloop
 
@@ -86,19 +82,20 @@ while gameloop:
         
         # Verificar qual botão foi clicado
         if acao == 'sair_menu':
-            main_menu = False
+            gameloop = False
         elif acao == 'jogar':
             jogando = True  # Inicia o jogo e mostra a tela preta
 
     else:
         img_principal()
-        if desenha_botao_inicio():
+        if desenha_menu_principal():
             main_menu = True  # Abre o menu principal se o botão "Menu Principal" for clicado
 
     # Evento para fechar o jogo
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameloop = False
+
 
     pygame.display.flip()
 
