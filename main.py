@@ -4,7 +4,7 @@ pygame.init()
 
 # Configuração da tela
 largura = 1024
-altura = 786
+altura = 768
 display = pygame.display.set_mode((largura, altura))
 pygame.display.set_caption("Sombra da Lua")
 
@@ -12,7 +12,7 @@ pygame.display.set_caption("Sombra da Lua")
 imagem = pygame.image.load("imagens/c6b9126928ba612211813f1c4b8dc6ec.jpg")
 imagem = pygame.transform.scale(imagem, (largura, altura))
 
-# Clock e configurações de fonte
+# Clock e configurações f ou t
 fps = 60
 clock = pygame.time.Clock()
 main_menu = False
@@ -20,12 +20,12 @@ gameloop = True
 jogando = False 
 
 # Configuração de fonte e botão
-def get_font(size):  # Função para carregar a fonte
+def get_font(size): 
     return pygame.font.Font('8-BIT WONDER.TTF', size)
 
 fonte = get_font(24)
 img_botao = pygame.image.load("imagens\Quit Rect (1).png")
-img_botao = pygame.transform.scale(img_botao, (300, 60))##ajustar a merda da imagem q ta toda fudida tambem 
+img_botao = pygame.transform.scale(img_botao, (300, 60))## ajustar a merda da imagem q ta toda fudida tambem 
 
 def img_principal():
     display.blit(imagem, (0, 0))
@@ -52,7 +52,7 @@ def desenha_menu_principal():
     menuCent = textoMenu.get_rect(center=(largura // 2, 100))
     display.blit(textoMenu, menuCent)
     
-    # Botões do menu centralizados
+    # botoes menu 
     botao_menu = Buttons('Sair do Menu', (largura // 2 - 140, 500))
     jogar = Buttons('Jogar', (largura // 2 - 140, 400))
     
@@ -80,16 +80,16 @@ while gameloop:
         img_principal()
         acao = desenha_menu_principal()
         
-        # Verificar qual botão foi clicado
+        #botao clic
         if acao == 'sair_menu':
             gameloop = False
         elif acao == 'jogar':
-            jogando = True  # Inicia o jogo e mostra a tela preta
+            jogando = True  # tela preta p iniciar
 
     else:
         img_principal()
         if desenha_menu_principal():
-            main_menu = True  # Abre o menu principal se o botão "Menu Principal" for clicado
+            main_menu = True  
 
     # Evento para fechar o jogo
     for event in pygame.event.get():
@@ -99,4 +99,4 @@ while gameloop:
 
     pygame.display.flip()
 
-pygame.quit()
+pygame.quit() 
