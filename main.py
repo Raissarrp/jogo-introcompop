@@ -1,4 +1,5 @@
 import pygame, sys, random
+from perso import personagem
 
 pygame.init()
 
@@ -9,7 +10,7 @@ display = pygame.display.set_mode((largura, altura))
 pygame.display.set_caption("Sombra da Lua")
 
 # Imagem de fundo
-imagem = pygame.image.load("imagens/c6b9126928ba612211813f1c4b8dc6ec.jpg")
+imagem = pygame.image.load("imagens\DALL.webp")
 imagem = pygame.transform.scale(imagem, (largura, altura))
 
 # Clock e configurações f ou t
@@ -23,9 +24,9 @@ jogando = False
 def get_font(size): 
     return pygame.font.Font('8-BIT WONDER.TTF', size)
 
-fonte = get_font(24)
+fonte = get_font(20)
 img_botao = pygame.image.load("imagens\Quit Rect (1).png")
-img_botao = pygame.transform.scale(img_botao, (300, 60))## ajustar a merda da imagem q ta toda fudida tambem 
+img_botao = pygame.transform.scale(img_botao, (200, 60))## ajustar a merda da imagem q ta toda fudida tambem 
 
 def img_principal():
     display.blit(imagem, (0, 0))
@@ -53,7 +54,7 @@ def desenha_menu_principal():
     display.blit(textoMenu, menuCent)
     
     # botoes menu 
-    botao_menu = Buttons('Sair do Menu', (largura // 2 - 140, 500))
+    botao_menu = Buttons('Sair', (largura // 2 - 140, 500))
     jogar = Buttons('Jogar', (largura // 2 - 140, 400))
     
 
@@ -67,36 +68,102 @@ def desenha_menu_principal():
         return 'sair_menu'
     return None
 
+class Personagem:
+    def __init__(self, nome, hp, velocidade, defesa, ataque, img_per, pos):
+        self.nome = nome
+        self.hp = hp
+        self.velocidade = velocidade
+        self.defesa = defesa
+        self.ataque = ataque
+        self.img_per = pygame.image.load(img_per)  
+        self.img_per = pygame.transform.scale(self.img_per, (100, 100))  
+        self.pos = pos
+
+    def atacar(self, alvo):
+        dano = self.ataque * (50 / (50 + alvo.defesa))
+        alvo.hp -= dano
+        if alvo.hp <= 0:
+            print(f"{alvo.nome} foi derrotado!")
+
+    def vivo(self):
+        return self.hp > 0
+
+    def draw(self, tela):
+        tela.blit(self.img_per, self.pos)
+        text = fonte.render(self.nome, True, (0, 0, 0))
+        tela.blit(text, (self.pos[0], self.pos[1] + 110))
+
+#personagens
+personagem1 = Personagem(
+    nome="Lux",
+    hp=120,
+    velocidade=80,
+    defesa=40,
+    ataque=70,
+    img_per="imagens/divapop.jpg",
+    pos=(50, 50),
+)
+
+personagem2 = Personagem(
+    nome="Lucas",
+    hp=150,
+    velocidade=60,
+    defesa=70,
+    ataque=50,
+    img_per="imagens/mashal.png",
+    pos=(200, 50),
+)
+
+personagem3 = Personagem(
+    nome="Marco",
+    hp=200,
+    velocidade=40,
+    defesa=90,
+    ataque=80,
+    img_per="imagens/mrsax.jpg",
+    pos=(350, 50),
+)
+
+personagem4 = Personagem(
+    nome="Ogro",
+    hp=100,
+    velocidade=100,
+    defesa=30,
+    ataque=60,
+    img_per="imagens/goblin.jpg",
+    pos=(500, 50),
+)
+
+personagens = [personagem1, personagem2, personagem3, personagem4 ]
+
 #gameloop
 
 while gameloop:
     clock.tick(fps)
-    display.fill((0, 0, 0))
-
+    display.fill((0, 0, 0)) 
     if jogando:
-        display.fill((0, 0, 0))  
+        for personagem in personagens:
+            personagem.draw(display)
+        
 
     elif main_menu:
         img_principal()
         acao = desenha_menu_principal()
         
-        #botao clic
         if acao == 'sair_menu':
             gameloop = False
         elif acao == 'jogar':
-            jogando = True  # tela preta p iniciar
+            jogando = True  
 
     else:
         img_principal()
         if desenha_menu_principal():
             main_menu = True  
 
-    # Evento para fechar o jogo
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameloop = False
 
-
-    pygame.display.flip()
-
-pygame.quit() 
+    pygame.display.flip() 
+    
