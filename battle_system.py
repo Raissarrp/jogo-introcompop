@@ -1,42 +1,88 @@
-import random
+import pygame
+import sys
 
-class BattleSystem:
-    """Gerencia a lógica de batalha do jogo"""
-    def __init__(self, personagens_jogador, personagens_inimigos):
-        self.personagens_jogador = personagens_jogador
-        self.personagens_inimigos = personagens_inimigos
-        self.todos_personagens = personagens_jogador + personagens_inimigos
-        self.turno_atual = 0
-        self.mensagens = []
+# Definição de constantes e cores
+LARGURA, ALTURA = 1024, 768
+PRETO = (0, 0, 0)
+BRANCO = (255, 255, 255)
+VERDE = (0, 255, 0)
+VERMELHO = (255, 0, 0)
 
-    def ordenar_turnos(self):
-        """Ordena os personagens por velocidade"""
-        return sorted(
-            [p for p in self.todos_personagens if p.vivo()],
-            key=lambda x: x.velocidade,
-            reverse=True
-        )
+# Inicialização do Pygame
+pygame.init()
+tela = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption("Batalha RPG")
 
-    def executar_turno_ia(self, personagem):
-        """Executa o turno de um personagem controlado pela IA"""
-        alvos_vivos = [p for p in self.personagens_jogador if p.vivo()]
-        if not alvos_vivos:
-            return None
-            
-        alvo = random.choice(alvos_vivos)
-        # 20% de chance de defender
-        if random.random() < 0.2:
-            return personagem.defender()
-        else:
-            return personagem.atacar(alvo)
+# Função para exibir texto na tela
+def exibir_texto(tela, texto, tamanho, cor, x, y):
+    fonte = pygame.font.SysFont('arial', tamanho)
+    texto_renderizado = fonte.render(texto, True, cor)
+    tela.blit(texto_renderizado, (x, y))
 
-    def verificar_fim_batalha(self):
-        """Verifica se a batalha terminou"""
-        jogador_vivo = any(p.vivo() for p in self.personagens_jogador)
-        inimigos_vivos = any(p.vivo() for p in self.personagens_inimigos)
-        
-        if not jogador_vivo:
-            return "derrota"
-        elif not inimigos_vivos:
-            return "vitoria"
-        return None
+# Função para exibir a interface de batalha
+def exibir_interface(tela, grupo1, grupo2, turno):
+    tela.fill(PRETO)
+
+    # Exibir informações do jogador
+    for i, personagem in enumerate(grupo1, 1):
+        exibir_texto(tela, f"{i}. {personagem}", 20, BRANCO, 10, i * 30 + 10)
+        exibir_texto(tela, f"Vida: {personagem.vida}/{personagem.vida_max}", 20, VERDE, 10, i * 30 + 30)
+
+    # Exibir informações do inimigo
+    for i, personagem in enumerate(grupo2, 1):
+        exibir_texto(tela, f"{i}. {personagem}", 20, BRANCO, LARGURA - 200, i * 30 + 10)
+        exibir_texto(tela, f"Vida: {personagem.vida}/{personagem.vida_max}", 20, VERMELHO, LARGURA - 200, i * 30 + 30)
+
+    # Exibir informações do turno
+    exibir_texto(tela, f"Turno: {turno}", 30, BRANCO, LARGURA // 2, ALTURA - 50)
+
+    pygame.display.update()
+
+# Função para criar grupos (exemplo)
+def criar_grupos():
+    # Esta função deve retornar dois grupos de personagens
+    # Exemplo de retorno:
+    return [Personagem("Heroi", 100, 100)], [Personagem("Inimigo", 100, 100)]
+
+# Função para o turno de batalha (exemplo)
+def turno_de_batalha(grupo1, grupo2):
+    # Esta função deve implementar a lógica do turno de batalha
+    pass
+
+# Classe Personagem (exemplo)
+class Personagem:
+    def __init__(self, nome, vida, vida_max):
+        self.nome = nome
+        self.vida = vida
+        self.vida_max = vida_max
+
+    def __str__(self):
+        return self.nome
+
+# Função principal do jogo
+def main():
+    grupo1, grupo2 = criar_grupos()
+    turno = 1
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        exibir_interface(tela, grupo1, grupo2, turno)
+        turno_de_batalha(grupo1, grupo2)
+
+        if not any(personagem.vida > 0 for personagem in grupo1):
+            exibir_texto(tela, "Grupo 1 foi derrotado!", 30, VERMELHO, LARGURA // 2, ALTURA // 2)
+            pygame.display.update()
+            pygame.time.wait(3000)
+            break
+        elif not any(personagem.vida > 0 for personagem in grupo2):
+            exibir_texto(tela, "Grupo 2 foi derrotado!", 30, VERDE, LARGURA // 2, ALTURA // 2)
+            pygame.display.update()
+            pygame.time.wait(3000)
+            break
+
+if __name__ == "__main__":
+    main()

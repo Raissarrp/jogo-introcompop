@@ -1,10 +1,9 @@
-# ui.py
 from config import BUTTON_SIZE
 import pygame
 
 class Button:
     """Classe para criar e gerenciar botões interativos"""
-    def __init__(self, text, pos, img_botao, tamanho=BUTTON_SIZE):
+    def __init__(self, text, pos, img_botao, tamanho=BUTTON_SIZE, text_color=(255, 255, 255), hover_color=(200, 200, 200)):
         self.text = text
         self.pos = pos
         self.image = pygame.transform.scale(img_botao, tamanho)

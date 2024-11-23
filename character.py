@@ -7,20 +7,13 @@ class Character:
     """
     def __init__(self, nome, hp, velocidade, defesa, ataque, img_path, pos):
         self.nome = nome
-        self.hp = hp
-        self.hp_max = hp
+        self.hp = self.hp_max = hp
         self.velocidade = velocidade
-        self.defesa_base = defesa
-        self.defesa = defesa
+        self.defesa_base = self.defesa = defesa
         self.ataque = ataque
         self.defesa_ativa = False
         self.pos = pos
-        self.carregar_imagem(img_path)
-        
-    def carregar_imagem(self, img_path):
-        """Carrega e redimensiona a imagem do personagem"""
-        self.imagem = pygame.image.load(img_path)
-        self.imagem = pygame.transform.scale(self.imagem, (100, 100))
+        self.imagem = pygame.transform.scale(pygame.image.load(img_path), (100, 100))
 
     def atacar(self, alvo):
         """
@@ -37,9 +30,7 @@ class Character:
 
     def receber_dano(self, dano):
         """Processa o dano recebido"""
-        self.hp -= dano
-        if self.hp < 0:
-            self.hp = 0
+        self.hp = max(0, self.hp - dano)
 
     def defender(self):
         """Ativa estado de defesa, duplicando a defesa"""
@@ -56,13 +47,8 @@ class Character:
 
     def draw(self, tela, fonte):
         """Desenha o personagem e sua barra de vida"""
-        # Desenha o personagem
         tela.blit(self.imagem, self.pos)
-        
-        # Desenha a barra de vida
         self.desenhar_barra_vida(tela)
-        
-        # Desenha o nome e HP
         texto = fonte.render(f"{self.nome}: {int(self.hp)}/{self.hp_max}", True, (255, 255, 255))
         tela.blit(texto, (self.pos[0], self.pos[1] + 110))
 
@@ -70,13 +56,8 @@ class Character:
         """Desenha uma barra de vida com cores dinâmicas"""
         largura_barra = 100
         altura_barra = 10
-        x = self.pos[0]
-        y = self.pos[1] - 15
-        
-        # Barra de fundo (vermelha)
+        x, y = self.pos[0], self.pos[1] - 15
         pygame.draw.rect(tela, (255, 0, 0), (x, y, largura_barra, altura_barra))
-        
-        # Barra de vida atual (verde)
         vida_percentual = max(0, self.hp / self.hp_max)
         largura_vida = int(largura_barra * vida_percentual)
         pygame.draw.rect(tela, (0, 255, 0), (x, y, largura_vida, altura_barra))
@@ -84,3 +65,11 @@ class Character:
     def vivo(self):
         """Verifica se o personagem ainda está vivo"""
         return self.hp > 0
+        # Criação dos personagens
+        divapop = Character("divapop", 120, 15, 10, 25, "imagens/divapop.png", (50, 300))
+        esqueleto = Character("esqueleto", 80, 10, 5, 15, "imagens/esqueleto.png", (150, 300))
+        goblin = Character("goblin", 70, 12, 6, 18, "imagens/goblin.png", (250, 300))
+        ladino = Character("ladino", 90, 14, 8, 20, "imagens/ladino.png", (350, 300))
+        mashal = Character("mashal", 110, 8, 12, 22, "imagens/mashal.png", (450, 300))
+        mrsax = Character("mrsax", 100, 9, 9, 19, "imagens/mrsax.png", (550, 300))
+        Um = Character("Um", 95, 11, 7, 17, "imagens/Um.png", (650, 300))
