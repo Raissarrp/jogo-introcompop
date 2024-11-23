@@ -1,0 +1,6 @@
+# Configurações gerais do jogo
+SCREEN_WIDTH = 1024
+SCREEN_HEIGHT = 768
+FPS = 60
+FONT_SIZE = 20
+BUTTON_SIZE = (280, 80)
