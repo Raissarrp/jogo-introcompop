@@ -1,169 +1,156 @@
-import pygame, sys, random
-from perso import personagem
-
-pygame.init()
-
-# Configuração da tela
-largura = 1024
-altura = 768
-display = pygame.display.set_mode((largura, altura))
-pygame.display.set_caption("Sombra da Lua")
-
-# Imagem de fundo
-imagem = pygame.image.load("imagens\DALL.webp")
-imagem = pygame.transform.scale(imagem, (largura, altura))
-
-# Clock e configurações f ou t
-fps = 60
-clock = pygame.time.Clock()
-main_menu = False
-gameloop = True
-jogando = False 
-
-# Configuração de fonte e botão
-def get_font(size): 
-    return pygame.font.Font('8-BIT WONDER.TTF', size)
-
-fonte = get_font(20)
-img_botao = pygame.image.load("imagens\Quit Rect (1).png")
-img_botao = pygame.transform.scale(img_botao, (200, 60))## ajustar a merda da imagem q ta toda fudida tambem 
-
-def img_principal():
-    display.blit(imagem, (0, 0))
-
-class Buttons: # ajustar esse negocio dos botoes q ta uma merda
-    def __init__(self, text, pos):
-        self.text = text
-        self.pos = pos
-        self.button = pygame.rect.Rect(self.pos[0], self.pos[1], 280, 80)
-
-    def draw(self, tela):
-        tela.blit(img_botao, self.button)
-        text = fonte.render(self.text, True, (0, 0, 0))  
-        tela.blit(text, (self.pos[0] + 31.5, self.pos[1] + 21))  # ajustar isso aq
-
-    def checa_clique(self):
-        if self.button.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-            return True
-        else:
-            return False
-
-def desenha_menu_principal():
-    textoMenu = get_font(100).render("MENU", True, "#b68f40")
-    menuCent = textoMenu.get_rect(center=(largura // 2, 100))
-    display.blit(textoMenu, menuCent)
-    
-    # botoes menu 
-    botao_menu = Buttons('Sair', (largura // 2 - 140, 500))
-    jogar = Buttons('Jogar', (largura // 2 - 140, 400))
-    
-
-    botao_menu.draw(display)
-    jogar.draw(display)
-    
-    
-    if jogar.checa_clique():
-        return 'jogar'
-    if botao_menu.checa_clique():
-        return 'sair_menu'
-    return None
+import pygame
 
 class Personagem:
-    def __init__(self, nome, hp, velocidade, defesa, ataque, img_per, pos):
+    def __init__(self, nome, vida, ataque, defesa, agilidade, classe):
         self.nome = nome
-        self.hp = hp
-        self.velocidade = velocidade
-        self.defesa = defesa
+        self.vida = vida
         self.ataque = ataque
-        self.img_per = pygame.image.load(img_per)  
-        self.img_per = pygame.transform.scale(self.img_per, (100, 100))  
-        self.pos = pos
+        self.defesa = defesa
+        self.agilidade = agilidade
+        self.classe = classe
+        self.vida_max = vida
+        self.defesa_fisica = defesa
+        self.defesa_magica = defesa
 
-    def atacar(self, alvo):
-        dano = self.ataque * (50 / (50 + alvo.defesa))
-        alvo.hp -= dano
-        if alvo.hp <= 0:
-            print(f"{alvo.nome} foi derrotado!")
+    def atacar(self, defensor):
+        """Calcula o dano de ataque e subtrai da vida do defensor."""
+        if self.classe == "Mago":
+            dano = max(0, self.ataque - defensor.defesa_magica)
+        else:
+            dano = max(0, self.ataque - defensor.defesa_fisica)
+        defensor.vida -= dano
 
-    def vivo(self):
-        return self.hp > 0
+    def __str__(self):
+        return f"{self.nome} - Vida: {self.vida}/{self.vida_max} - Classe: {self.classe}"
 
-    def draw(self, tela):
-        tela.blit(self.img_per, self.pos)
-        text = fonte.render(self.nome, True, (0, 0, 0))
-        tela.blit(text, (self.pos[0], self.pos[1] + 110))
+class Guerreiro(Personagem):
+    def __init__(self, nome, vida=100, ataque=20, defesa=10, agilidade=5):
+        super().__init__(nome, vida, ataque, defesa, agilidade, "Guerreiro")
 
-#personagens
-personagem1 = Personagem(
-    nome="Lux",
-    hp=120,
-    velocidade=80,
-    defesa=40,
-    ataque=70,
-    img_per="imagens/divapop.jpg",
-    pos=(50, 50),
-)
+class Mago(Personagem):
+    def __init__(self, nome, vida=80, ataque=15, defesa=5, agilidade=15):
+        super().__init__(nome, vida, ataque, defesa, agilidade, "Mago")
 
-personagem2 = Personagem(
-    nome="Lucas",
-    hp=150,
-    velocidade=60,
-    defesa=70,
-    ataque=50,
-    img_per="imagens/mashal.png",
-    pos=(200, 50),
-)
+    def ataque_especial(self, alvo):
+        """Ataque mágico que causa dano a todos os inimigos."""
+        dano_extra = 20
+        for inimigo in self.inimigos:
+            dano = self.ataque + dano_extra - inimigo.defesa_magica
+            inimigo.vida -= dano
 
-personagem3 = Personagem(
-    nome="Marco",
-    hp=200,
-    velocidade=40,
-    defesa=90,
-    ataque=80,
-    img_per="imagens/mrsax.jpg",
-    pos=(350, 50),
-)
+class Curandeiro(Personagem):
+    def __init__(self, nome, vida=70, ataque=10, defesa=8, agilidade=12):
+        super().__init__(nome, vida, ataque, defesa, agilidade, "Curandeiro")
 
-personagem4 = Personagem(
-    nome="Ogro",
-    hp=100,
-    velocidade=100,
-    defesa=30,
-    ataque=60,
-    img_per="imagens/goblin.jpg",
-    pos=(500, 50),
-)
+    def curar(self, aliado):
+        """Restaura uma quantidade fixa de vida do aliado."""
+        cura = 20
+        aliado.vida = min(aliado.vida + cura, aliado.vida_max)
 
-personagens = [personagem1, personagem2, personagem3, personagem4 ]
+class Ladino(Personagem):
+    def __init__(self, nome, vida=90, ataque=18, defesa=6, agilidade=18):
+        super().__init__(nome, vida, ataque, defesa, agilidade, "Ladino")
 
-#gameloop
+    def ataque_critico(self, alvo):
+        """Causa dano extra baseado na vida atual do alvo."""
+        dano_extra = int(alvo.vida * 0.10)
+        dano = self.ataque + dano_extra - alvo.defesa_fisica
+        alvo.vida -= dano
 
-while gameloop:
-    clock.tick(fps)
-    display.fill((0, 0, 0)) 
-    if jogando:
-        for personagem in personagens:
-            personagem.draw(display)
-        
+# Atribuição de personagens
+esqueleto = Guerreiro("Esqueleto", vida=120, ataque=18)
+goblin = Mago("Goblin", vida=90, ataque=12, defesa=3)
+um = Curandeiro("Um", vida=60, ataque=8, agilidade=18)
+divapop = Mago("Divapop", vida=75, ataque=18, defesa=6)
+mrsax = Guerreiro("Mrsax", vida=110, ataque=22, defesa=8)
+mashal = Curandeiro("Mashal", vida=80, ataque=9, cura=20)
+ladino = Ladino("Ladino", vida=95, ataque=16, defesa=4)
 
-    elif main_menu:
-        img_principal()
-        acao = desenha_menu_principal()
-        
-        if acao == 'sair_menu':
-            gameloop = False
-        elif acao == 'jogar':
-            jogando = True  
+def criar_grupos():
+    """Cria e retorna dois grupos de personagens."""
+    grupo1 = [esqueleto, goblin, um]
+    grupo2 = [divapop, mrsax, mashal, ladino]
+    return grupo1, grupo2
 
-    else:
-        img_principal()
-        if desenha_menu_principal():
-            main_menu = True  
+def turno_de_batalha(grupo1, grupo2):
+    """Gerenciador de turnos de batalha."""
+    grupo1.sort(key=lambda x: x.agilidade, reverse=True)
+    grupo2.sort(key=lambda x: x.agilidade, reverse=True)
 
+    for personagem in grupo1:
+        if personagem.vida > 0:
+            for inimigo in grupo2:
+                if inimigo.vida > 0:
+                    personagem.atacar(inimigo)
+                    if inimigo.vida <= 0:
+                        print(f"{inimigo} foi derrotado!")
+                        grupo2.remove(inimigo)
+                        break
+            print(f"{personagem} atacou!")
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameloop = False
+    for personagem in grupo2:
+        if personagem.vida > 0:
+            for inimigo in grupo1:
+                if inimigo.vida > 0:
+                    personagem.atacar(inimigo)
+                    if inimigo.vida <= 0:
+                        print(f"{inimigo} foi derrotado!")
+                        grupo1.remove(inimigo)
+                        break
+            print(f"{personagem} contra-atacou!")
 
-    pygame.display.flip() 
+    print("\n---------- Próximo Turno ----------\n")
+
+def exibir_menu_inicial():
+    """Exibe o menu inicial e permite ao jogador escolher os personagens."""
+    print("Bem-vindo ao jogo de batalha!")
+    print("Selecione os personagens para cada grupo:")
     
+    grupo1 = []
+    grupo2 = []
+    
+    while len(grupo1) < 3 or len(grupo2) < 3:
+        print("\nGrupo 1:")
+        for i, personagem in enumerate(grupo1, 1):
+            print(f"{i}. {personagem}")
+        print("\nGrupo 2:")
+        for i, personagem in enumerate(grupo2, 1):
+            print(f"{i}. {personagem}")
+        
+        escolha = input("Escolha um personagem (1-9) ou digite 'batalha' para iniciar: ")
+        
+        if escolha.isdigit():
+            indice = int(escolha) - 1
+            if indice < 6:
+                if indice < 3:
+                    grupo1.append(criar_personagem(indice))
+                else:
+                    grupo2.append(criar_personagem(indice - 3))
+            else:
+                print("Escolha inválida.")
+        elif escolha.lower() == 'batalha':
+            break
+        else:
+            print("Entrada inválida. Por favor, digite um número de 1 a 9 ou 'batalha'.")
+
+def criar_personagem(indice):
+    """Cria um personagem com base no índice fornecido."""
+    personagens = [esqueleto, goblin, um, divapop, mrsax, mashal, ladino]
+    return personagens[indice]
+
+def iniciar_jogo():
+    grupo1, grupo2 = criar_grupos()
+    exibir_menu_inicial()
+    
+    while True:
+        turno_de_batalha(grupo1, grupo2)
+
+        if not any(personagem.vida > 0 for personagem in grupo1):
+            print("Grupo 1 foi derrotado!")
+            break
+        elif not any(personagem.vida > 0 for personagem in grupo2):
+            print("Grupo 2 foi derrotado!")
+            break
+
+# Iniciar o jogo
+iniciar_jogo()
